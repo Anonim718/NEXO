@@ -14,6 +14,7 @@
 - [x] Motor-driver abstraction
 - [ ] Hardware-specific motor driver implementation
 - [ ] Autonomous navigation prototype
+- [x] Deterministic Planner layer
 
 ## Phase 3 — Voice
 - [x] Voice adapter boundary
