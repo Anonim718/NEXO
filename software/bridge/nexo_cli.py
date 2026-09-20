@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 
-from serial_bridge import NexoBridge
+from software.bridge.serial_bridge import NexoBridge
 
 
 def main() -> None:
