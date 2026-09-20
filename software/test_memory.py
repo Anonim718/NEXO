@@ -1,4 +1,4 @@
-from memory import Memory
+from software.memory import Memory
 
 def test_memory_is_bounded():
     m=Memory(max_entries=2); m.remember("a"); m.remember("b"); m.remember("c")
