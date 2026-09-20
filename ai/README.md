@@ -12,3 +12,8 @@ The AI layer is responsible for understanding higher-level commands and turning 
 - Hardware command generation
 
 The AI should never directly control hardware without passing through the robot's control and safety layers.
+
+
+## Architecture rule
+
+The brain produces validated intent; the bridge transports commands; the Arduino controller owns physical safety.
