@@ -12,19 +12,19 @@ The controller is responsible for motors, sensors, timing and safety. A future c
 - Default baud rate: 115200
 - One command per line
 - Commands are ASCII text
-- Replies are ASCII text
+- Every accepted command produces one response line
 
 ## Commands
 
-| Command | Meaning |
-|---|---|
-| STOP | Stop all motors immediately |
-| FORWARD | Drive forward |
-| BACK | Drive backward |
-| LEFT | Turn left |
-| RIGHT | Turn right |
-| STATUS | Return controller state |
-| PING | Test that the controller is alive |
+| Command | Meaning | Response |
+|---|---|---|
+| STOP | Stop all motors immediately | `OK=STOP` |
+| FORWARD | Drive forward | `OK=FORWARD` |
+| BACK | Drive backward | `OK=BACK` |
+| LEFT | Turn left | `OK=LEFT` |
+| RIGHT | Turn right | `OK=RIGHT` |
+| STATUS | Return controller state | `OK=STATUS STATE=... DIST_CM=...` |
+| PING | Test that the controller is alive | `OK=PONG` |
 
 Short aliases are supported by the firmware where documented.
 
@@ -38,7 +38,17 @@ Examples:
 - The command timeout expires.
 - An explicit STOP command is received.
 
+Safety events are reported as a single line such as:
+
+`SAFETY=OBSTACLE_STOP`
+
 The brain should treat the controller as authoritative for physical safety.
+
+## Timeout rule
+
+Movement commands refresh the command timeout.
+
+`STATUS` and `PING` do **not** refresh the movement timeout. This prevents repeated monitoring requests from accidentally keeping the robot moving indefinitely.
 
 ## Future protocol
 
@@ -49,7 +59,6 @@ The protocol is intentionally simple at this stage. Future versions can add:
 - sensor telemetry
 - battery state
 - sequence IDs
-- acknowledgements
-- structured responses
+- structured error codes
 
-A future structured protocol may use lines such as `CMD FORWARD` and `ACK FORWARD`, but the current firmware keeps compatibility with simple human-readable commands.
+A future structured protocol may use explicit command and acknowledgement frames, but the current line-based format is deliberately easy to debug from a serial terminal.
