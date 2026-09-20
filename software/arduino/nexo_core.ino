@@ -1,13 +1,7 @@
-/*
- * NEXO Core Firmware
- * Initial foundation for movement, safety and sensors.
- *
- * Hardware assumptions are intentionally kept configurable.
- */
-
 #include <Arduino.h>
+#include "commands.h"
 
-// Motor pins: change these to match the final motor driver wiring.
+// Motor driver pins. Update after final hardware selection.
 constexpr uint8_t LEFT_PWM  = 5;
 constexpr uint8_t LEFT_IN1  = 7;
 constexpr uint8_t LEFT_IN2  = 8;
@@ -15,13 +9,16 @@ constexpr uint8_t RIGHT_PWM = 6;
 constexpr uint8_t RIGHT_IN1 = 9;
 constexpr uint8_t RIGHT_IN2 = 10;
 
-// Ultrasonic sensor
+// Ultrasonic sensor.
 constexpr uint8_t TRIG_PIN = 12;
 constexpr uint8_t ECHO_PIN = 11;
 
-// Safety
 constexpr uint16_t OBSTACLE_STOP_CM = 20;
 constexpr uint8_t DEFAULT_SPEED = 150;
+constexpr unsigned long COMMAND_TIMEOUT_MS = 3000;
+
+unsigned long lastCommandAt = 0;
+RobotCommand activeCommand = RobotCommand::Stop;
 
 void setMotor(uint8_t pwm, uint8_t in1, uint8_t in2, int16_t speed) {
   speed = constrain(speed, -255, 255);
@@ -64,9 +61,42 @@ long readDistanceCm() {
   return static_cast<long>(duration / 58UL);
 }
 
-bool obstacleDetected() {
-  const long distance = readDistanceCm();
-  return distance > 0 && distance <= OBSTACLE_STOP_CM;
+bool obstacleDetected(long& distanceCm) {
+  distanceCm = readDistanceCm();
+  return distanceCm > 0 && distanceCm <= OBSTACLE_STOP_CM;
+}
+
+void executeCommand(RobotCommand command) {
+  activeCommand = command;
+  lastCommandAt = millis();
+
+  switch (command) {
+    case RobotCommand::Stop:
+      stopMotors();
+      break;
+    case RobotCommand::Forward:
+      if (!obstacleDetected(lastDistanceCm)) drive(DEFAULT_SPEED, DEFAULT_SPEED);
+      else stopMotors();
+      break;
+    case RobotCommand::Back:
+      drive(-DEFAULT_SPEED, -DEFAULT_SPEED);
+      break;
+    case RobotCommand::Left:
+      drive(-DEFAULT_SPEED, DEFAULT_SPEED);
+      break;
+    case RobotCommand::Right:
+      drive(DEFAULT_SPEED, -DEFAULT_SPEED);
+      break;
+    case RobotCommand::Status:
+      Serial.print(F("STATE="));
+      Serial.print(commandName(activeCommand));
+      Serial.print(F(" DIST_CM="));
+      Serial.println(lastDistanceCm);
+      break;
+    default:
+      Serial.println(F("ERR=UNKNOWN_COMMAND"));
+      break;
+  }
 }
 
 void setup() {
@@ -82,30 +112,45 @@ void setup() {
 
   Serial.begin(115200);
   stopMotors();
+  lastCommandAt = millis();
 
-  Serial.println(F("NEXO core online."));
+  Serial.println(F("NEXO CORE ONLINE"));
+  Serial.println(F("Commands: STOP FORWARD BACK LEFT RIGHT STATUS"));
 }
 
 void loop() {
-  // Safety layer gets priority over movement commands.
-  if (obstacleDetected()) {
-    stopMotors();
-    Serial.println(F("SAFETY: obstacle detected."));
-    delay(50);
-    return;
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    RobotCommand command = parseCommand(input);
+
+    if (command != RobotCommand::Unknown) {
+      executeCommand(command);
+      Serial.print(F("OK="));
+      Serial.println(commandName(command));
+    } else {
+      Serial.println(F("ERR=UNKNOWN_COMMAND"));
+    }
   }
 
-  // Temporary autonomous test:
-  // forward -> stop -> reverse -> stop.
-  drive(DEFAULT_SPEED, DEFAULT_SPEED);
-  delay(1000);
+  long distanceCm = readDistanceCm();
 
-  stopMotors();
-  delay(500);
+  if (activeCommand == RobotCommand::Forward &&
+      distanceCm > 0 &&
+      distanceCm <= OBSTACLE_STOP_CM) {
+    stopMotors();
+    activeCommand = RobotCommand::Stop;
+    Serial.println(F("SAFETY=OBSTACLE_STOP"));
+  }
 
-  drive(-DEFAULT_SPEED, -DEFAULT_SPEED);
-  delay(500);
+  if (activeCommand != RobotCommand::Stop &&
+      millis() - lastCommandAt >= COMMAND_TIMEOUT_MS) {
+    stopMotors();
+    activeCommand = RobotCommand::Stop;
+    Serial.println(F("SAFETY=COMMAND_TIMEOUT"));
+  }
 
-  stopMotors();
-  delay(1000);
+  lastDistanceCm = distanceCm;
+  delay(30);
 }
+
+long lastDistanceCm = -1;
