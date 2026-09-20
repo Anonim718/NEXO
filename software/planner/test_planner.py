@@ -1,4 +1,4 @@
-from planner import Action, Goal, NexoPlanner
+from software.planner.planner import Action, Goal, NexoPlanner
 
 def test_forward_goal_creates_bounded_step():
     step = NexoPlanner().plan(Goal.MOVE_FORWARD, 500)[0]
