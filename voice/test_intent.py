@@ -1,5 +1,5 @@
 from software.brain.brain import Intent
-from intent import text_to_intent
+from voice.intent import text_to_intent
 
 def test_portuguese_stop(): assert text_to_intent("  PARAR ") is Intent.STOP
 def test_motion_phrase(): assert text_to_intent("turn left") is Intent.LEFT
