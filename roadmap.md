@@ -29,9 +29,9 @@
 - [x] Shared state model
 - [x] Software safety orchestration
 - [x] Deterministic Brain decision layer
-- [ ] Memory/state persistence
+- [x] Memory/state persistence
 - [ ] Personality and behaviour rules
-- [ ] Safe tool/device orchestration
+- [x] Safe tool/device orchestration
 - [ ] Online AI integration
 
 ## Phase 5 — Physical Interaction
@@ -47,7 +47,7 @@
 - [x] CI verification across supported Python versions
 - [ ] Connect physical hardware, voice and AI
 - [ ] Battery monitoring on final hardware
-- [ ] Diagnostics and telemetry
+- [x] Diagnostics and telemetry
 - [ ] Autonomous behaviour
 - [ ] Full-system test
 - [ ] Polished demo
