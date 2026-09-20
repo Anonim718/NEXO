@@ -1,40 +1,23 @@
-# NEXO Brain Bridge
+# NEXO Computer Bridge
 
-This directory will contain the computer-side bridge between NEXO's higher-level software and the Arduino controller.
+The bridge is the controlled boundary between computer-side software and the Arduino controller.
 
-## Planned responsibilities
+## Responsibilities
 
-1. Receive commands from the voice/AI layer.
-2. Validate and normalize commands.
-3. Send commands over USB serial.
-4. Read controller responses.
-5. Expose robot state to higher-level software.
-6. Never bypass controller-side safety logic.
+- Connect to the NEXO serial controller.
+- Accept only the controller command allowlist.
+- Send ASCII commands at 115200 baud.
+- Return raw responses for compatibility.
+- Parse responses through the structured protocol API.
 
-## Planned stack
+## API
 
-The first bridge implementation will be intentionally small:
+send_command(command) returns the raw controller response string.
 
-- Python
-- USB serial
-- line-based protocol
-- explicit command allow-list
+send_and_parse(command) returns a ControllerResponse with category, value and fields.
 
-The bridge should remain hardware-agnostic. Hardware-specific safety belongs in the Arduino controller.
+The bridge contains no AI logic and does not bypass Arduino safety.
 
-## Example flow
+## Testing
 
-```text
-Voice / AI
-    |
-    v
-Brain Bridge
-    |
-    | USB Serial
-    v
-Arduino Controller
-    |
-    +--> Motor driver
-    +--> Distance sensors
-    +--> Future arm controller
-```
+The bridge tests use mocked serial connections. Integration tests use the deterministic simulated controller, so the software stack can be tested without physical hardware.
