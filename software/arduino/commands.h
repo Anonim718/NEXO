@@ -13,5 +13,5 @@ enum class RobotCommand : uint8_t {
   Unknown
 };
 
-RobotCommand parseCommand(String input);
+RobotCommand parseCommand(const char* input);
 const __FlashStringHelper* commandName(RobotCommand command);
