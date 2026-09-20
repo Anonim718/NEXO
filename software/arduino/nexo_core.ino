@@ -54,49 +54,63 @@ bool obstacleDetected(long distanceCm) {
 }
 
 void reportStatus() {
-  Serial.print(F("STATE="));
+  Serial.print(F("OK=STATUS STATE="));
   Serial.print(commandName(activeCommand));
   Serial.print(F(" DIST_CM="));
   Serial.println(lastDistanceCm);
 }
 
 void executeCommand(RobotCommand command) {
-  lastCommandAt = millis();
-
   switch (command) {
     case RobotCommand::Stop:
       activeCommand = RobotCommand::Stop;
       stopMotors();
+      lastCommandAt = millis();
+      Serial.println(F("OK=STOP"));
       break;
 
     case RobotCommand::Forward:
-      activeCommand = RobotCommand::Forward;
       if (obstacleDetected(lastDistanceCm)) {
         stopMotors();
         activeCommand = RobotCommand::Stop;
+        lastCommandAt = millis();
         Serial.println(F("SAFETY=OBSTACLE_STOP"));
       } else {
+        activeCommand = RobotCommand::Forward;
         drive(DEFAULT_SPEED, DEFAULT_SPEED);
+        lastCommandAt = millis();
+        Serial.println(F("OK=FORWARD"));
       }
       break;
 
     case RobotCommand::Back:
       activeCommand = RobotCommand::Back;
       drive(-DEFAULT_SPEED, -DEFAULT_SPEED);
+      lastCommandAt = millis();
+      Serial.println(F("OK=BACK"));
       break;
 
     case RobotCommand::Left:
       activeCommand = RobotCommand::Left;
       drive(-DEFAULT_SPEED, DEFAULT_SPEED);
+      lastCommandAt = millis();
+      Serial.println(F("OK=LEFT"));
       break;
 
     case RobotCommand::Right:
       activeCommand = RobotCommand::Right;
       drive(DEFAULT_SPEED, -DEFAULT_SPEED);
+      lastCommandAt = millis();
+      Serial.println(F("OK=RIGHT"));
       break;
 
     case RobotCommand::Status:
+      // STATUS must not refresh the movement timeout.
       reportStatus();
+      break;
+
+    case RobotCommand::Ping:
+      Serial.println(F("OK=PONG"));
       break;
 
     default:
@@ -124,7 +138,7 @@ void setup() {
   lastSensorAt = now;
 
   Serial.println(F("NEXO CORE ONLINE"));
-  Serial.println(F("Commands: STOP FORWARD BACK LEFT RIGHT STATUS"));
+  Serial.println(F("Commands: STOP FORWARD BACK LEFT RIGHT STATUS PING"));
 }
 
 void loop() {
@@ -133,14 +147,7 @@ void loop() {
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     RobotCommand command = parseCommand(input);
-
-    if (command != RobotCommand::Unknown) {
-      executeCommand(command);
-      Serial.print(F("OK="));
-      Serial.println(commandName(command));
-    } else {
-      Serial.println(F("ERR=UNKNOWN_COMMAND"));
-    }
+    executeCommand(command);
   }
 
   if (now - lastSensorAt >= SENSOR_INTERVAL_MS) {
