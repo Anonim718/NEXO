@@ -1,24 +1,12 @@
 #include <Arduino.h>
+#include "config.h"
 #include "commands.h"
 
-// Motor driver pins. Update after final hardware selection.
-constexpr uint8_t LEFT_PWM  = 5;
-constexpr uint8_t LEFT_IN1  = 7;
-constexpr uint8_t LEFT_IN2  = 8;
-constexpr uint8_t RIGHT_PWM = 6;
-constexpr uint8_t RIGHT_IN1 = 9;
-constexpr uint8_t RIGHT_IN2 = 10;
-
-// Ultrasonic sensor.
-constexpr uint8_t TRIG_PIN = 12;
-constexpr uint8_t ECHO_PIN = 11;
-
-constexpr uint16_t OBSTACLE_STOP_CM = 20;
-constexpr uint8_t DEFAULT_SPEED = 150;
-constexpr unsigned long COMMAND_TIMEOUT_MS = 3000;
-
 unsigned long lastCommandAt = 0;
+unsigned long lastSensorAt = 0;
+
 RobotCommand activeCommand = RobotCommand::Stop;
+long lastDistanceCm = -1;
 
 void setMotor(uint8_t pwm, uint8_t in1, uint8_t in2, int16_t speed) {
   speed = constrain(speed, -255, 255);
@@ -61,38 +49,56 @@ long readDistanceCm() {
   return static_cast<long>(duration / 58UL);
 }
 
-bool obstacleDetected(long& distanceCm) {
-  distanceCm = readDistanceCm();
+bool obstacleDetected(long distanceCm) {
   return distanceCm > 0 && distanceCm <= OBSTACLE_STOP_CM;
 }
 
+void reportStatus() {
+  Serial.print(F("STATE="));
+  Serial.print(commandName(activeCommand));
+  Serial.print(F(" DIST_CM="));
+  Serial.println(lastDistanceCm);
+}
+
 void executeCommand(RobotCommand command) {
-  activeCommand = command;
   lastCommandAt = millis();
 
   switch (command) {
     case RobotCommand::Stop:
+      activeCommand = RobotCommand::Stop;
       stopMotors();
       break;
+
     case RobotCommand::Forward:
-      if (!obstacleDetected(lastDistanceCm)) drive(DEFAULT_SPEED, DEFAULT_SPEED);
-      else stopMotors();
+      activeCommand = RobotCommand::Forward;
+      if (obstacleDetected(lastDistanceCm)) {
+        stopMotors();
+        activeCommand = RobotCommand::Stop;
+        Serial.println(F("SAFETY=OBSTACLE_STOP"));
+      } else {
+        drive(DEFAULT_SPEED, DEFAULT_SPEED);
+      }
       break;
+
     case RobotCommand::Back:
+      activeCommand = RobotCommand::Back;
       drive(-DEFAULT_SPEED, -DEFAULT_SPEED);
       break;
+
     case RobotCommand::Left:
+      activeCommand = RobotCommand::Left;
       drive(-DEFAULT_SPEED, DEFAULT_SPEED);
       break;
+
     case RobotCommand::Right:
+      activeCommand = RobotCommand::Right;
       drive(DEFAULT_SPEED, -DEFAULT_SPEED);
       break;
+
     case RobotCommand::Status:
-      Serial.print(F("STATE="));
-      Serial.print(commandName(activeCommand));
-      Serial.print(F(" DIST_CM="));
-      Serial.println(lastDistanceCm);
+      reportStatus();
       break;
+
     default:
       Serial.println(F("ERR=UNKNOWN_COMMAND"));
       break;
@@ -112,13 +118,18 @@ void setup() {
 
   Serial.begin(115200);
   stopMotors();
-  lastCommandAt = millis();
+
+  const unsigned long now = millis();
+  lastCommandAt = now;
+  lastSensorAt = now;
 
   Serial.println(F("NEXO CORE ONLINE"));
   Serial.println(F("Commands: STOP FORWARD BACK LEFT RIGHT STATUS"));
 }
 
 void loop() {
+  const unsigned long now = millis();
+
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     RobotCommand command = parseCommand(input);
@@ -132,25 +143,22 @@ void loop() {
     }
   }
 
-  long distanceCm = readDistanceCm();
+  if (now - lastSensorAt >= SENSOR_INTERVAL_MS) {
+    lastSensorAt = now;
+    lastDistanceCm = readDistanceCm();
 
-  if (activeCommand == RobotCommand::Forward &&
-      distanceCm > 0 &&
-      distanceCm <= OBSTACLE_STOP_CM) {
-    stopMotors();
-    activeCommand = RobotCommand::Stop;
-    Serial.println(F("SAFETY=OBSTACLE_STOP"));
+    if (activeCommand == RobotCommand::Forward &&
+        obstacleDetected(lastDistanceCm)) {
+      stopMotors();
+      activeCommand = RobotCommand::Stop;
+      Serial.println(F("SAFETY=OBSTACLE_STOP"));
+    }
   }
 
   if (activeCommand != RobotCommand::Stop &&
-      millis() - lastCommandAt >= COMMAND_TIMEOUT_MS) {
+      now - lastCommandAt >= COMMAND_TIMEOUT_MS) {
     stopMotors();
     activeCommand = RobotCommand::Stop;
     Serial.println(F("SAFETY=COMMAND_TIMEOUT"));
   }
-
-  lastDistanceCm = distanceCm;
-  delay(30);
 }
-
-long lastDistanceCm = -1;
