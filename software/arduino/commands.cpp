@@ -10,6 +10,7 @@ RobotCommand parseCommand(String input) {
   if (input == "LEFT" || input == "L") return RobotCommand::Left;
   if (input == "RIGHT" || input == "R") return RobotCommand::Right;
   if (input == "STATUS" || input == "S") return RobotCommand::Status;
+  if (input == "PING") return RobotCommand::Ping;
 
   return RobotCommand::Unknown;
 }
@@ -22,6 +23,7 @@ const __FlashStringHelper* commandName(RobotCommand command) {
     case RobotCommand::Left: return F("LEFT");
     case RobotCommand::Right: return F("RIGHT");
     case RobotCommand::Status: return F("STATUS");
+    case RobotCommand::Ping: return F("PING");
     default: return F("UNKNOWN");
   }
 }
