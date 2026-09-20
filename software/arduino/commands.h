@@ -9,6 +9,7 @@ enum class RobotCommand : uint8_t {
   Left,
   Right,
   Status,
+  Ping,
   Unknown
 };
 
