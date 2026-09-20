@@ -37,6 +37,14 @@ The goal is a physical robot that can understand natural-language commands, oper
 - Explicit STOP priority
 - Unit tests without physical hardware
 
+### 🟢 Planner / protocol / state foundations
+- Bounded deterministic Planner
+- Allowlisted serial protocol parser and formatter
+- Central software safety configuration
+- Hardware-independent telemetry model
+- Atomic JSON persistence for non-critical state
+- Unit tests for protocol and persistence
+
 ### 🟢 Software integration foundations
 - Computer-to-Arduino bridge
 - Structured controller response parsing
@@ -46,7 +54,7 @@ The goal is a physical robot that can understand natural-language commands, oper
 - Integration tests without physical hardware
 
 ### 🟡 In progress
-- Planner layer
+- Deterministic Planner layer
 - Full bridge ↔ brain integration
 - Offline voice engine integration
 - Physical battery implementation after hardware selection
@@ -55,10 +63,10 @@ The goal is a physical robot that can understand natural-language commands, oper
 ### 🔴 Future
 - Autonomous navigation
 - Online AI integration
-- Persistent robot state and memory
+- Advanced persistent robot memory
 - Personality / behaviour layer
 - Object detection and interaction
-- Diagnostics and telemetry
+- Diagnostics and telemetry models
 - Full hardware integration
 - Full-system testing
 - Polished public demo
@@ -117,6 +125,11 @@ NEXO/
 │   ├── arduino/         # Low-level robot controller and MotorDriver
 │   ├── brain/           # Deterministic intent, state and safety layer
 │   ├── bridge/          # Computer ↔ Arduino bridge and tests
+│   ├── planner/         # Deterministic high-level action planner
+│   ├── protocol/        # Allowlisted serial command protocol
+│   ├── config.py        # Central software configuration
+│   ├── telemetry.py     # Hardware-independent telemetry model
+│   └── state_store.py   # Non-critical JSON state persistence
 │   ├── hardware/        # Hardware-independent subsystem interfaces
 │   └── sim/             # Deterministic controller simulator
 ├── voice/               # Voice subsystem documentation
