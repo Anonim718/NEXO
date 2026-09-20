@@ -24,6 +24,7 @@ ALLOWED_COMMANDS = {
     "LEFT",
     "RIGHT",
     "STATUS",
+    "PING",
 }
 
 
@@ -59,5 +60,11 @@ class NexoBridge:
             raise RuntimeError("NEXO controller is not connected")
 
         self.connection.write((command + "\n").encode("ascii"))
-        response = self.connection.readline().decode("ascii", errors="replace").strip()
+        response = self.connection.readline().decode(
+            "ascii", errors="replace"
+        ).strip()
+
+        if not response:
+            raise TimeoutError(f"No response from NEXO controller for {command}")
+
         return response
