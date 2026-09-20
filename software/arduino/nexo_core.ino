@@ -8,32 +8,16 @@ unsigned long lastSensorAt = 0;
 RobotCommand activeCommand = RobotCommand::Stop;
 long lastDistanceCm = -1;
 
-void setMotor(uint8_t pwm, uint8_t in1, uint8_t in2, int16_t speed) {
-  speed = constrain(speed, -255, 255);
-
-  if (speed > 0) {
-    digitalWrite(in1, HIGH);
-    digitalWrite(in2, LOW);
-    analogWrite(pwm, speed);
-  } else if (speed < 0) {
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, HIGH);
-    analogWrite(pwm, -speed);
-  } else {
-    digitalWrite(in1, LOW);
-    digitalWrite(in2, LOW);
-    analogWrite(pwm, 0);
-  }
-}
+MotorDriver motorDriver(
+    LEFT_PWM, LEFT_IN1, LEFT_IN2,
+    RIGHT_PWM, RIGHT_IN1, RIGHT_IN2);
 
 void stopMotors() {
-  setMotor(LEFT_PWM, LEFT_IN1, LEFT_IN2, 0);
-  setMotor(RIGHT_PWM, RIGHT_IN1, RIGHT_IN2, 0);
+  motorDriver.stop();
 }
 
 void drive(int16_t leftSpeed, int16_t rightSpeed) {
-  setMotor(LEFT_PWM, LEFT_IN1, LEFT_IN2, leftSpeed);
-  setMotor(RIGHT_PWM, RIGHT_IN1, RIGHT_IN2, rightSpeed);
+  motorDriver.drive(leftSpeed, rightSpeed);
 }
 
 long readDistanceCm() {
@@ -141,12 +125,7 @@ void readSerialLine() {
 }
 
 void setup() {
-  pinMode(LEFT_PWM, OUTPUT);
-  pinMode(LEFT_IN1, OUTPUT);
-  pinMode(LEFT_IN2, OUTPUT);
-  pinMode(RIGHT_PWM, OUTPUT);
-  pinMode(RIGHT_IN1, OUTPUT);
-  pinMode(RIGHT_IN2, OUTPUT);
+  motorDriver.begin();
 
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
