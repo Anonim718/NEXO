@@ -2,7 +2,7 @@
 
 **NEXO** is an autonomous hybrid AI robot project built around a layered architecture:
 
-**Voice / AI → Brain Bridge → Arduino Controller → Hardware**
+**Voice / AI → Brain → Bridge → Arduino Controller → Hardware**
 
 The goal is a physical robot that can understand natural-language commands, operate autonomously, interact with its environment and eventually manipulate objects with an arm.
 
@@ -12,9 +12,10 @@ The goal is a physical robot that can understand natural-language commands, oper
 - Repository structure
 - Hardware and software documentation
 - Development roadmap
-- Testing strategy
+- Layered safety architecture
+- Python CI and automated tests
 
-### 🟢 Arduino controller prototype
+### 🟢 Controller prototype
 - Forward / reverse movement
 - Left / right turning
 - Ultrasonic obstacle detection
@@ -22,21 +23,32 @@ The goal is a physical robot that can understand natural-language commands, oper
 - Command timeout safety stop
 - Serial command interface at 115200 baud
 - Centralized hardware configuration
+- Isolated MotorDriver abstraction
+
+### 🟢 Software integration foundations
+- Allowlisted computer-to-Arduino bridge
+- Structured controller response parsing
+- Brain intent-to-command boundary
+- Deterministic simulated controller
+- Integration tests without physical hardware
+- Hardware-independent battery interface
+- Hardware-independent arm interface
+- Voice adapter boundary
 
 ### 🟡 In progress
-- Computer-side brain bridge
-- Structured serial protocol
-- Hardware abstraction
-- Arm / servo subsystem
-- Offline voice control
+- CI verification across supported Python versions
+- Full bridge ↔ brain integration
+- Physical battery implementation after hardware selection
+- Physical servo/arm implementation after hardware selection
+- Offline voice engine integration
 
 ### 🔴 Future
 - Online AI integration
-- Persistent robot state
+- Persistent robot state and memory
 - Personality / behaviour layer
 - Autonomous navigation
 - Object detection and interaction
-- Full system integration
+- Full hardware integration
 
 ## Serial commands
 
@@ -46,26 +58,29 @@ BACK
 LEFT
 RIGHT
 STATUS
+PING
 
-See docs/serial-protocol.md for the protocol design.
+See docs/serial-protocol.md and docs/command-spec.md.
 
 ## Repository structure
 
 NEXO/
 ├── ai/                  # AI and behaviour layer
-├── docs/                # Architecture, hardware, protocol and testing
+├── docs/                # Architecture, protocol, testing and integration
 ├── hardware/            # Wiring and component documentation
 ├── software/
-│   ├── arduino/         # Low-level robot controller
-│   └── bridge/          # Planned computer ↔ Arduino bridge
-├── voice/               # Hybrid voice subsystem
+│   ├── arduino/         # Low-level robot controller and MotorDriver
+│   ├── bridge/          # Computer ↔ Arduino bridge and tests
+│   ├── hardware/        # Hardware-independent subsystem interfaces
+│   └── sim/             # Deterministic controller simulator
+├── voice/               # Voice subsystem documentation
 └── roadmap.md           # Project roadmap
 
 ## Safety architecture
 
 The AI layer does **not** directly control motors or other physical hardware.
 
-All physical commands pass through the controller, where safety checks can stop the robot independently of the AI.
+All physical commands pass through the brain allowlist, bridge allowlist and Arduino controller. The controller remains the final physical safety authority.
 
 Examples include:
 - obstacle detection
@@ -77,7 +92,7 @@ Examples include:
 
 The current Arduino firmware is a **generic H-bridge prototype**. Its pin configuration should not be treated as an Adafruit Motor Shield configuration.
 
-The final motor driver will be isolated behind a hardware abstraction layer once the exact hardware is selected.
+The MotorDriver class isolates the motor boundary so the final driver can be changed without changing the brain protocol. The exact physical driver must be selected before implementing driver-specific code.
 
 ## Development principle
 
