@@ -1,0 +1,33 @@
+name: Python Bridge CI
+
+on:
+  push:
+    paths:
+      - "software/bridge/**"
+      - ".github/workflows/bridge-ci.yml"
+  pull_request:
+    paths:
+      - "software/bridge/**"
+      - ".github/workflows/bridge-ci.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r software/bridge/requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        run: pytest software/bridge/tests
