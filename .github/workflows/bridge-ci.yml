@@ -3,16 +3,19 @@ name: Python Bridge CI
 on:
   push:
     paths:
-      - "software/bridge/**"
+      - "software/**"
       - ".github/workflows/bridge-ci.yml"
   pull_request:
     paths:
-      - "software/bridge/**"
+      - "software/**"
       - ".github/workflows/bridge-ci.yml"
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout
@@ -21,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -29,5 +32,8 @@ jobs:
           pip install -r software/bridge/requirements.txt
           pip install pytest
 
+      - name: Compile Python modules
+        run: python -m compileall -q software
+
       - name: Run tests
-        run: pytest software/bridge/tests
+        run: pytest -q
