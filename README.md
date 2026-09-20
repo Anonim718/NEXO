@@ -54,17 +54,17 @@ The goal is a physical robot that can understand natural-language commands, oper
 - Integration tests without physical hardware
 
 ### 🟡 In progress
-- Deterministic Planner layer
-- Full bridge ↔ brain integration
+- Full bridge ↔ brain ↔ planner integration hardening
 - Offline voice engine integration
 - Physical battery implementation after hardware selection
 - Physical servo/arm implementation after hardware selection
+- Autonomous navigation
 
 ### 🔴 Future
-- Autonomous navigation
 - Online AI integration
-- Advanced persistent robot memory
-- Personality / behaviour layer
+- Bounded persistent robot memory
+- Deterministic personality / behaviour policy
+- Safe tool orchestration boundary
 - Object detection and interaction
 - Diagnostics and telemetry models
 - Full hardware integration
@@ -111,8 +111,10 @@ Serial communication currently uses **115200 baud**.
 
 See:
 - `docs/brain.md`
-- `docs/serial-protocol.md`
-- `docs/command-spec.md`
+- `docs/protocol.md`
+- `docs/planner.md`
+- `docs/testing.md`
+- `docs/software-architecture.md`
 
 ## 📁 Repository structure
 
@@ -132,7 +134,7 @@ NEXO/
 │   └── state_store.py   # Non-critical JSON state persistence
 │   ├── hardware/        # Hardware-independent subsystem interfaces
 │   └── sim/             # Deterministic controller simulator
-├── voice/               # Voice subsystem documentation
+├── voice/               # Voice subsystem and intent adapter
 └── roadmap.md           # Project roadmap
 ```
 
