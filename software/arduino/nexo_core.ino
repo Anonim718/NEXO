@@ -105,7 +105,6 @@ void executeCommand(RobotCommand command) {
       break;
 
     case RobotCommand::Status:
-      // STATUS must not refresh the movement timeout.
       reportStatus();
       break;
 
@@ -116,6 +115,28 @@ void executeCommand(RobotCommand command) {
     default:
       Serial.println(F("ERR=UNKNOWN_COMMAND"));
       break;
+  }
+}
+
+void readSerialLine() {
+  while (Serial.available() > 0) {
+    const char incoming = static_cast<char>(Serial.read());
+
+    if (incoming == '\r') continue;
+
+    if (incoming == '\n') {
+      inputBuffer[inputLength] = '\0';
+      executeCommand(parseCommand(inputBuffer));
+      inputLength = 0;
+      continue;
+    }
+
+    if (inputLength < INPUT_BUFFER_SIZE - 1) {
+      inputBuffer[inputLength++] = incoming;
+    } else {
+      inputLength = 0;
+      Serial.println(F("ERR=COMMAND_TOO_LONG"));
+    }
   }
 }
 
@@ -144,11 +165,7 @@ void setup() {
 void loop() {
   const unsigned long now = millis();
 
-  if (Serial.available() > 0) {
-    String input = Serial.readStringUntil('\n');
-    RobotCommand command = parseCommand(input);
-    executeCommand(command);
-  }
+  readSerialLine();
 
   if (now - lastSensorAt >= SENSOR_INTERVAL_MS) {
     lastSensorAt = now;
