@@ -27,6 +27,7 @@
 - [x] Allowlisted command mapping
 - [x] Shared state model
 - [x] Software safety orchestration
+- [x] Deterministic Brain decision layer
 - [ ] Memory/state persistence
 - [ ] Personality and behaviour rules
 - [ ] Safe tool/device orchestration
@@ -49,6 +50,12 @@
 - [ ] Autonomous behaviour
 - [ ] Full-system test
 - [ ] Polished demo
+
+## Current engineering sequence
+
+`VOICE/AI → INTENT → BRAIN/SAFETY → PLANNER → BRIDGE → ARDUINO → HARDWARE`
+
+The Brain layer is now deterministic and hardware-independent. The next software milestone is a planner that can turn validated high-level goals into short, safe controller actions without bypassing the Brain or Arduino safety layer.
 
 ## Engineering rule
 
