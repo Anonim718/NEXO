@@ -1,4 +1,4 @@
-from state_store import JsonStateStore
+from software.state_store import JsonStateStore
 
 def test_state_round_trip(tmp_path):
     store = JsonStateStore(tmp_path / "state.json")
