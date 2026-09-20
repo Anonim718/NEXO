@@ -42,3 +42,16 @@ def test_timeout_without_response(bridge):
 
     with pytest.raises(TimeoutError):
         bridge.send_command("STATUS")
+
+
+def test_send_and_parse_returns_structured_response(bridge):
+    fake_serial = MagicMock()
+    fake_serial.is_open = True
+    fake_serial.readline.return_value = b"OK=STATUS STATE=FORWARD DIST_CM=42\r\n"
+    bridge.connection = fake_serial
+
+    response = bridge.send_and_parse("STATUS")
+
+    assert response.category == "OK"
+    assert response.value == "STATUS"
+    assert response.fields == {"STATE": "FORWARD", "DIST_CM": "42"}
