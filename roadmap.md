@@ -26,6 +26,7 @@
 - [x] AI intent boundary
 - [x] Allowlisted command mapping
 - [x] Shared state model
+- [x] Software safety orchestration
 - [ ] Memory/state persistence
 - [ ] Personality and behaviour rules
 - [ ] Safe tool/device orchestration
@@ -41,6 +42,7 @@
 ## Phase 6 — Integration
 - [x] Deterministic controller simulator
 - [x] Software integration tests
+- [x] CI verification across supported Python versions
 - [ ] Connect physical hardware, voice and AI
 - [ ] Battery monitoring on final hardware
 - [ ] Diagnostics and telemetry
