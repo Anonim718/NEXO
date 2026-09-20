@@ -1,4 +1,4 @@
-from commands import Command, format_command, parse_command
+from software.protocol.commands import Command, format_command, parse_command
 
 def test_parse_normalizes_input():
     assert parse_command("  forward ") is Command.FORWARD
