@@ -11,6 +11,8 @@ from __future__ import annotations
 import time
 from typing import Optional
 
+from software.bridge.protocol import ControllerResponse, parse_response
+
 try:
     import serial
 except ImportError:
@@ -68,3 +70,7 @@ class NexoBridge:
             raise TimeoutError(f"No response from NEXO controller for {command}")
 
         return response
+
+    def send_and_parse(self, command: str) -> ControllerResponse:
+        """Send an allowlisted command and return a structured response."""
+        return parse_response(self.send_command(command))
