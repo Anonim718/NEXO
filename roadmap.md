@@ -3,35 +3,51 @@
 ## Phase 1 — Foundation
 - [x] Create the GitHub repository
 - [x] Define the project structure
-- [ ] Document the robot architecture
-- [ ] Finalise the first hardware prototype
+- [x] Document the robot architecture
+- [ ] Finalise the physical hardware prototype
 
 ## Phase 2 — Movement
-- [ ] Motor control
-- [ ] Basic obstacle detection
-- [ ] Stable manual control
+- [x] Motor control prototype
+- [x] Basic obstacle detection
+- [x] Command timeout safety
+- [x] Stable serial manual control
+- [x] Motor-driver abstraction
+- [ ] Hardware-specific motor driver implementation
 - [ ] Autonomous navigation prototype
 
 ## Phase 3 — Voice
+- [x] Voice adapter boundary
 - [ ] Offline wake word / basic commands
-- [ ] Speech recognition
+- [ ] Speech recognition engine
 - [ ] Text-to-speech
 - [ ] Online voice fallback
 
 ## Phase 4 — Intelligence
-- [ ] AI command layer
-- [ ] Memory/state system
+- [x] AI intent boundary
+- [x] Allowlisted command mapping
+- [x] Shared state model
+- [ ] Memory/state persistence
 - [ ] Personality and behaviour rules
-- [ ] Safe tool/device control
+- [ ] Safe tool/device orchestration
+- [ ] Online AI integration
 
 ## Phase 5 — Physical Interaction
-- [ ] Arm mechanism
-- [ ] Servo control
+- [x] Hardware-independent arm interface
+- [ ] Final arm mechanism
+- [ ] Servo driver implementation
 - [ ] Object detection
 - [ ] Basic object interaction
 
 ## Phase 6 — Integration
-- [ ] Connect hardware, voice and AI
-- [ ] Add diagnostics
-- [ ] Add automated tests where practical
-- [ ] Build a polished demo
+- [x] Deterministic controller simulator
+- [x] Software integration tests
+- [ ] Connect physical hardware, voice and AI
+- [ ] Battery monitoring on final hardware
+- [ ] Diagnostics and telemetry
+- [ ] Autonomous behaviour
+- [ ] Full-system test
+- [ ] Polished demo
+
+## Engineering rule
+
+Build each layer independently, test it, then integrate it. The Arduino controller remains the final physical safety authority.
