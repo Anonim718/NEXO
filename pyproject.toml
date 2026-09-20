@@ -1,4 +1,4 @@
 [tool.pytest.ini_options]
-testpaths = ["software/bridge/tests"]
+testpaths = ["software"]
 python_files = ["test_*.py"]
 addopts = "-ra"
